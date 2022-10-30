@@ -1,9 +1,10 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const { Router } = require('express')
-const router = Router()
+// const { Router } = require('express')
+// const router = Router()
 const { default: mongoose } = require('mongoose')
+const {dbAddress} = require('./config')
 const path = require('path')
 
 const movieRouter = require('./routes/movieRouter')
@@ -25,7 +26,7 @@ app.use('/auth', authRouter)
 
 const start = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/movies-react')
+    await mongoose.connect(dbAddress)
     app.listen(PORT, () => console.log(`Started on port ${PORT}...`))
     
   } catch (e) {

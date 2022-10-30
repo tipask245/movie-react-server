@@ -10,7 +10,7 @@ const genAccessToken = (id, role) => {
     id,
     role
   }
-  return jwt.sign(payload, key, {expiresIn: '5h'})
+  return jwt.sign(payload, key, {expiresIn: '1h'})
 }
 
 class authController {
@@ -40,24 +40,65 @@ class authController {
     try {
       const {username, password} = req.body
       const user = await User.findOne({username})
+      console.log(user);
       if (!user) {
-        res.status(400).json('Пользователь не найден')
+        return res.status(400).json('Пользователь не найден')
       }
       const validPassword = bcrypt.compareSync(password, user.password)
       if (!validPassword) {
-        res.status(400).json('Неверный пароль')
+        return res.status(400).json('Неверный пароль')
       }
       const token = genAccessToken(user._id, user.role)
       let data = {
+        id: user._id,
         token: token,
         role: user.role,
-        username: username
+        // isUser: false,
+        userInf: {
+          username: user.username,
+          reviews: user.reviews,
+          marks: user.marks,
+          willWatch: user.willWatch,
+          watched: user.watched
+        }
       }
-      return res.json(data)
+      // if (JSON.stringify(user._id).slice(1, -1) === payload.id) {
+      //   data.isUser = true
+      // }
+      if (validPassword) {
+        return res.json(data)
+      }
     } catch (error) {
       console.log(error)
       res.status(400).json({message: 'login error'})
     }
+  }
+
+  async getUserInformation(req, res) {
+    try{
+      // console.log(req);
+      const userId = req.body.id
+      const user = await User.findById(userId)
+      const token = req.headers.authorization.split(' ')[1]
+      const payload = jwt.verify(token, key)
+      let data = {
+        userInf: {
+          username: user.username,
+          reviews: user.reviews,
+          marks: user.marks,
+          willWatch: user.willWatch,
+          watched: user.watched
+        },
+        isUser: false
+      }
+      if (JSON.stringify(user._id).slice(1, -1) === payload.id) {
+        data.isUser = true
+      }
+      return res.json(data)
+    } catch {
+      return res.status(403).json('token error')
+    }
+    
   }
 
   async getUsers(req, res) {

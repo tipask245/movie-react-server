@@ -8,9 +8,10 @@ router.post('/registration', [
   check('password', 'Пароль должен быть больше 3-х и меньше 15-и символов').isLength({min: 3, max: 15})
 ], controller.registration)
 router.post('/login', [
-  check()
+  // check()
 ], controller.login)
 router.get('/users', controller.getUsers)
 router.post('/checkAuth', controller.checkAuth)
+router.post('/getUserInformation', controller.getUserInformation)
 
 module.exports = router

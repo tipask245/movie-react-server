@@ -6,8 +6,9 @@ const movieSchema = new Schema({
   title: String, 
   type: String,
   desc: String,
-  rating: String,
-  review: Array
+  rating: Number,
+  ratingArray: Array,
+  reviews: Array
   // counter: Array
 });
 
