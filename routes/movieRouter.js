@@ -21,11 +21,11 @@ router.post('/set_rating', controller.setRating)
 
 router.post('/add_in_list', controller.addInList)
 
-router.post('/remove_from_list', controller.removeFromList)
+router.delete('/remove_from_list', controller.removeFromList)
 
 router.post('/create_review', controller.createReview)
 
-router.post('/delete_review', controller.deleteReview)
+router.delete('/delete_review', controller.deleteReview)
 
 router.get('/get', controller.getMovie)
 

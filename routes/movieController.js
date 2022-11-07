@@ -58,7 +58,7 @@ class movieController {
       result.reviews.push(data)
       await result.save()
       // console.log(result);
-      return res.json(reviews)
+      return res.json({reviews: reviews.reverse(), userData: result.reviews.reverse()})
     })
   }
 
@@ -114,7 +114,7 @@ class movieController {
       console.log(req.body.listName);
       let filmTitle, filmImg, filmRating
       const listName = req.body.listName
-      const username = req.body.name
+      const username = req.body.username
       const filmId = req.body.id
       const _id = new mongoose.Types.ObjectId()
       Movie.findById(filmId, async (error, result) => {
@@ -133,7 +133,7 @@ class movieController {
         result[listName].push(data)
         await result.save()
         console.log(result[listName]);
-        return res.json(result[listName])
+        return res.json(result[listName].reverse())
       })
     } catch(e) {
       console.log('error');
@@ -142,8 +142,9 @@ class movieController {
 
   removeFromList(req, res) {
     try{
+      console.log(req);
       const listName = req.body.listName
-      const username = req.body.name
+      const username = req.body.username
       User.findOne({username}, async (err, result) => {
         
         const editedList = result[listName].filter(el => el.filmId !== req.body.id)
@@ -160,7 +161,6 @@ class movieController {
   deleteReview(req, res) {
     try {
       const reviewId = req.body._id
-      console.log(reviewId);
       const username = req.body.username
       User.findOne({username}, async (err, result) => {
         let reviews = result.reviews.filter(el => el._id.toString() !== reviewId)
@@ -169,9 +169,7 @@ class movieController {
       })
       // console.log(req.body.filmId);
       Movie.findById(req.body.filmId, async (error, result) => {
-        console.log(result.reviews.length)
         const reviews = result.reviews.filter(el => el._id.toString() !== reviewId)
-        console.log(reviews.length)
         result.reviews = reviews
         await result.save()
         return res.json("review deleted")

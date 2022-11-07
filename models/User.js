@@ -4,6 +4,7 @@ const userSchema = new Schema({
   username: {type: String, unique: true, required: true},
   password: {type: String, required: true},
   role: [{type: String, ref: 'Role'}],
+  avatar: String,
   reviews: Array,
   marks: Array,
   willWatch: Array,

@@ -40,7 +40,6 @@ class authController {
     try {
       const {username, password} = req.body
       const user = await User.findOne({username})
-      console.log(user);
       if (!user) {
         return res.status(400).json('Пользователь не найден')
       }
@@ -56,6 +55,7 @@ class authController {
         // isUser: false,
         userInf: {
           username: user.username,
+          avatar: user.avatar,
           reviews: user.reviews,
           marks: user.marks,
           willWatch: user.willWatch,
@@ -66,7 +66,9 @@ class authController {
       //   data.isUser = true
       // }
       if (validPassword) {
-        return res.json(data)
+        return res
+          // .cookie('token', token, { httpOnly: true })
+          .json(data)
       }
     } catch (error) {
       console.log(error)
@@ -84,10 +86,11 @@ class authController {
       let data = {
         userInf: {
           username: user.username,
-          reviews: user.reviews,
-          marks: user.marks,
-          willWatch: user.willWatch,
-          watched: user.watched
+          avatar: user.avatar,
+          reviews: user.reviews.reverse(),
+          marks: user.marks.reverse(),
+          willWatch: user.willWatch.reverse(),
+          watched: user.watched.reverse()
         },
         isUser: false
       }
@@ -120,6 +123,21 @@ class authController {
       res.json(isUserAuth)
     } catch (e) {
       res.status(403).json('token error')
+    }
+  }
+
+  uploadImage(req, res) {
+    try {
+      const username = req.headers.username
+      console.log(req.headers.username);
+      User.findOne({username}, async (err, result) => {
+        result.avatar = req.file.path
+        await result.save()
+      })
+      console.log(req.file);
+      return res.json(req.file.path)
+    } catch(e) {
+      throw e
     }
   }
 }
