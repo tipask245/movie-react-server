@@ -63,15 +63,20 @@ class movieController {
   }
 
   async getMovie(req, res) {
-    let options = req.query
-    // console.log(options)
-    Movie.paginate({}, options, (error, result) => {
-      res.json(result)
-    })
+    try {
+      let options = req.query
+      // console.log(options)
+      Movie.paginate({}, options, (error, result) => {
+        return res.json(result)
+      })
+    } catch(e) {
+      console.log(e)
+    }
+    
   }
 
   async getMovieById(req, res) {
-    
+    try {
       let filter = {}
       console.log(req.params)
       if (req.params) {
@@ -80,8 +85,31 @@ class movieController {
       Movie.find(filter, (error, result) => {
         return res.json(result)
       })
-    
-    
+    } catch(e) {
+      console.log(e)
+    }
+  }
+
+  async searchMovie(req, res) {
+    try {
+      const reg = new RegExp(req.query.search)
+      const movies = await Movie.find({ title: reg }).limit(5).exec()
+      let data = []
+      movies.forEach(el => {
+        const movie = {
+          _id: el._id,
+          img: el.img,
+          title: el.title,
+          type: el.type,
+          rating: el.rating
+        }
+        data.push(movie)
+      })
+      return res.json(data)
+      // поиск по регулярному выражению, полученному из инпута поиска. хук useDebounce на клиенте
+    } catch(e) {
+      console.log(e)
+    }
   }
 
   async setRating(req, res) {
@@ -146,7 +174,6 @@ class movieController {
       const listName = req.body.listName
       const username = req.body.username
       User.findOne({username}, async (err, result) => {
-        
         const editedList = result[listName].filter(el => el.filmId !== req.body.id)
         result[listName] = editedList
         await result.save()

@@ -31,4 +31,6 @@ router.get('/get', controller.getMovie)
 
 router.get('/get_byid/:_id/:isAuth', controller.getMovieById)
 
+router.get('/search_movie', controller.searchMovie)
+
 module.exports = router
