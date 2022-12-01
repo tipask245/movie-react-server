@@ -2,6 +2,7 @@ const User = require('../models/User')
 const Role = require('../models/Role')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
 const { validationResult } = require('express-validator')
 const { key } = require('../config')
 
@@ -129,12 +130,14 @@ class authController {
   uploadImage(req, res) {
     try {
       const username = req.headers.username
-      console.log(req.headers.username);
+      // console.log(req.headers.username);
       User.findOne({username}, async (err, result) => {
+        //удалить предыдущую картинку
+        // fs.unlinkSync(`images/${result.avatar.split('\\')[1]}`)
+        // console.log(result.avatar.split('\\')[1])
         result.avatar = req.file.path
         await result.save()
       })
-      console.log(req.file);
       return res.json(req.file.path)
     } catch(e) {
       throw e

@@ -93,7 +93,7 @@ class movieController {
   async searchMovie(req, res) {
     try {
       const reg = new RegExp(req.query.search)
-      const movies = await Movie.find({ title: reg }).limit(5).exec()
+      const movies = await Movie.find({ title: {"$regex": reg, "$options": "i"}}).limit(5).exec()
       let data = []
       movies.forEach(el => {
         const movie = {
@@ -105,6 +105,10 @@ class movieController {
         }
         data.push(movie)
       })
+      if (!data.length) {
+        console.log(123);
+        return res.json('not found')
+      }
       return res.json(data)
       // поиск по регулярному выражению, полученному из инпута поиска. хук useDebounce на клиенте
     } catch(e) {
@@ -139,13 +143,10 @@ class movieController {
 
   async addInList(req, res) {
     try {
-      console.log(req.body.listName);
       let filmTitle, filmImg, filmRating
-      const listName = req.body.listName
-      const username = req.body.username
-      const filmId = req.body.id
+      const { listName, username, id } = req.body
       const _id = new mongoose.Types.ObjectId()
-      Movie.findById(filmId, async (error, result) => {
+      Movie.findById(id, async (error, result) => {
         filmTitle = result.title
         filmImg = result.img
         filmRating = result.rating
@@ -153,26 +154,23 @@ class movieController {
       User.findOne({username}, async (err, result) => {
         let data = {
           _id,
-          filmId,
+          filmId: id,
           filmImg,
           filmTitle,
           filmRating
         }
         result[listName].push(data)
         await result.save()
-        console.log(result[listName]);
         return res.json(result[listName].reverse())
       })
     } catch(e) {
-      console.log('error');
+      console.log('error', e);
     }
   }
 
   removeFromList(req, res) {
     try{
-      console.log(req);
-      const listName = req.body.listName
-      const username = req.body.username
+      const { listName, username } = req.body.listName
       User.findOne({username}, async (err, result) => {
         const editedList = result[listName].filter(el => el.filmId !== req.body.id)
         result[listName] = editedList
@@ -187,16 +185,15 @@ class movieController {
   
   deleteReview(req, res) {
     try {
-      const reviewId = req.body._id
-      const username = req.body.username
+      const { filmId, _id, username } = req.body
       User.findOne({username}, async (err, result) => {
-        let reviews = result.reviews.filter(el => el._id.toString() !== reviewId)
+        let reviews = result.reviews.filter(el => el._id.toString() !== _id)
         result.reviews = reviews
         await result.save()
       })
       // console.log(req.body.filmId);
-      Movie.findById(req.body.filmId, async (error, result) => {
-        const reviews = result.reviews.filter(el => el._id.toString() !== reviewId)
+      Movie.findById(filmId, async (error, result) => {
+        const reviews = result.reviews.filter(el => el._id.toString() !== _id)
         result.reviews = reviews
         await result.save()
         return res.json("review deleted")
