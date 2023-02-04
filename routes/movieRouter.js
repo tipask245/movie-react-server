@@ -4,6 +4,7 @@ const Movie = require('../models/Movie')
 const { check } = require('express-validator')
 const controller = require('./movieController')
 const roleMiddleware = require('../middleware/role.middleware')
+const authMiddleware = require('../middleware/auth.middleware')
  
 router.post('/create', [
   // roleMiddleware(['admin']),
@@ -13,19 +14,19 @@ router.post('/create', [
   check('rating', 'Рейтинг должен быть больше 1 символа и меньше 3-х').isLength({min: 1, max: 3})
 ], controller.createMovie)
 
-router.post('/set_rating', controller.setRating)
+router.post('/set_rating', authMiddleware, controller.setRating)
 
 // router.post('/set_willWatch', controller.setWillWatch)
 
 // router.post('/set_watched', controller.setWatched)
 
-router.post('/add_in_list', controller.addInList)
+router.post('/add_in_list', authMiddleware, controller.addInList)
 
-router.delete('/remove_from_list', controller.removeFromList)
+router.delete('/remove_from_list', authMiddleware, controller.removeFromList)
 
-router.post('/create_review', controller.createReview)
+router.post('/create_review', authMiddleware, controller.createReview)
 
-router.delete('/delete_review', controller.deleteReview)
+router.delete('/delete_review', authMiddleware, controller.deleteReview)
 
 router.get('/get', controller.getMovie)
 
