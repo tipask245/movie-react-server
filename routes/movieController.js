@@ -24,7 +24,7 @@ class movieController {
     
     const filmId = Number(req.body.id)
     const userId = req.user.id
-    console.log(typeof userId);
+    // console.log(typeof userId);
     const {reviewTitle, reviewBody} = req.body.review
     const reviewId = (await db.query('INSERT INTO reviews(user_id, film_id, title, body) values($1, $2, $3, $4) RETURNING id', [userId, filmId, reviewTitle, reviewBody])).rows[0].id
     console.log(reviewId);
