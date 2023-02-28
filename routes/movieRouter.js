@@ -1,6 +1,5 @@
 const { Router } = require('express')
 const router = Router()
-const Movie = require('../models/Movie')
 const { check } = require('express-validator')
 const controller = require('./movieController')
 const roleMiddleware = require('../middleware/role.middleware')
