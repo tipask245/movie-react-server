@@ -83,12 +83,9 @@ class authController {
 
   async getUserInformation(req, res) {
     try{
-      // console.log(req);
       const userId = req.user.id
       console.log(req.user);
       const user = await db.query('SELECT username, avatar FROM users WHERE id = $1', [userId])
-      // const token = req.headers.authorization.split(' ')[1]
-      // const payload = jwt.verify(token, key)
       const willWatch = await db.query(`SELECT movies.id, movies.img, movies.title, movies.rating FROM ((users INNER JOIN will_watch ON users.id = will_watch.user_id) INNER JOIN movies ON will_watch.film_id = movies.id) WHERE users.id = $1;`, [userId])
       const watched = await db.query('SELECT movies.id, movies.img, movies.title, movies.rating FROM ((users INNER JOIN watched on users.id = watched.user_id) INNER JOIN movies on watched.film_id = movies.id) WHERE users.id = $1;', [userId])
       const marks = await db.query('SELECT movies.id, movies.img, movies.title, movies.rating, marks.mark FROM ((users INNER JOIN marks on users.id = marks.user_id) INNER JOIN movies on marks.film_id = movies.id) WHERE users.id = $1;', [userId])
@@ -120,10 +117,7 @@ class authController {
 
   async getUsers(req, res) {
     try {
-      // const userRole = new Role()
-      // const adminRole = new Role({value: 'admin'})
-      // await userRole.save()
-      // await adminRole.save()
+      // ? сделать 
       res.json('ok')
     } catch (error) {
       throw error

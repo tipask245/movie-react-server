@@ -1,15 +1,12 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const { default: mongoose } = require('mongoose')
-const {dbAddress} = require('./config')
 const path = require('path')
 const movieRouter = require('./routes/movieRouter')
 const authRouter = require('./routes/authRouter')
 
 
 const PORT = process.env.PORT
-
 const app = express()
 
 app.use(cors())
@@ -23,9 +20,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 
 const start = async () => {
   try {
-    await mongoose.connect(dbAddress)
     app.listen(PORT, () => console.log(`Started on port ${PORT}...`))
-    
   } catch (e) {
     throw e
   }
