@@ -1,6 +1,4 @@
 const { validationResult } = require('express-validator')
-const mongoose = require('mongoose')
-
 const db = require('../sqlDB')
 
 class movieController {

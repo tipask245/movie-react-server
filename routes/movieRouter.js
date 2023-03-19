@@ -6,18 +6,15 @@ const roleMiddleware = require('../middleware/role.middleware')
 const authMiddleware = require('../middleware/auth.middleware')
  
 router.post('/create', [
-  // roleMiddleware(['admin']),
+  authMiddleware,
+  roleMiddleware('admin'),
   check('title', 'Название не может быть пустым').notEmpty(),
-  check('type', 'Пароль должен быть больше 3-х и меньше 15-и символов').isLength({min: 3, max: 15}),
+  check('type', 'Тип должен быть больше 3-х и меньше 15-и символов').isLength({min: 3, max: 15}),
   check('desc', 'Описание должно быть больше 15 символов').isLength({min: 15}),
   check('rating', 'Рейтинг должен быть больше 1 символа и меньше 3-х').isLength({min: 1, max: 3})
 ], controller.createMovie)
 
 router.post('/set_rating', authMiddleware, controller.setRating)
-
-// router.post('/set_willWatch', controller.setWillWatch)
-
-// router.post('/set_watched', controller.setWatched)
 
 router.post('/add_in_list', authMiddleware, controller.addInList)
 

@@ -15,8 +15,6 @@ app.use(express.urlencoded({ extended: false }))
 app.use('/movie', movieRouter)
 app.use('/auth', authRouter)
 app.use('/images', express.static(path.join(__dirname, 'images')))
-// app.use('/image', imageRouter)
-// app.use('/images_get', express.static(path.join('images')))
 
 const start = async () => {
   try {

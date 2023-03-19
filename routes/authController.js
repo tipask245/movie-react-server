@@ -68,10 +68,6 @@ class authController {
         }
       }
 
-      // if (JSON.stringify(user._id).slice(1, -1) === payload.id) {
-      //   data.isUser = true
-      // }
-
       return res
         // .cookie('token', token, { httpOnly: true })
         .json(data)
