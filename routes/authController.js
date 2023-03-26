@@ -41,7 +41,7 @@ class authController {
     try {
       const {username, password} = req.body
       const user = await db.query('SELECT * FROM users WHERE username = $1', [username])
-      if (!user.rows) {
+      if (!user.rowCount) {
         return res.status(400).json('Пользователь не найден')
       }
       const validPassword = bcrypt.compareSync(password, user.rows[0].password)

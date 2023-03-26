@@ -4,14 +4,13 @@ const db = require('../sqlDB')
 class movieController {
 
   async createMovie(req, res) {
-    console.log(req)
     const {img, title, desc, type, rating} = req.body
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
       res.status(400).json(validationErrors)
     }  
     await db.query('INSERT INTO movies (img, title, content, item_type, rating, origin_rating) values($1, $2, $3, $4)', [img, title, desc, type, rating, rating])
-    res.json(req.body)
+    return res.json(req.body)
   }
 
   async createReview(req, res) {
@@ -22,11 +21,9 @@ class movieController {
     
     const filmId = Number(req.body.id)
     const userId = req.user.id
-    // console.log(typeof userId);
     const {reviewTitle, reviewBody} = req.body.review
     const reviewId = (await db.query('INSERT INTO reviews(user_id, film_id, title, body) values($1, $2, $3, $4) RETURNING id', [userId, filmId, reviewTitle, reviewBody])).rows[0].id
-    console.log(reviewId);
-    const resultReview = (await db.query('SELECT reviews.id, movies.img, movies.title, movies.rating, reviews.title AS review_title, reviews.body AS review_body FROM ((users INNER JOIN reviews on users.id = reviews.user_id) INNER JOIN movies on reviews.film_id = movies.id) WHERE reviews.id = $1;', [reviewId])).rows[0]
+    const resultReview = (await db.query('SELECT movies.id as film_id, reviews.id, movies.img, movies.title, movies.rating, reviews.title AS review_title, reviews.body AS review_body FROM ((users INNER JOIN reviews on users.id = reviews.user_id) INNER JOIN movies on reviews.film_id = movies.id) WHERE reviews.id = $1;', [reviewId])).rows[0]
     const reviewForFilm = (await db.query('SELECT users.username, reviews.id, reviews.title, reviews.body FROM ((users INNER JOIN reviews on users.id = reviews.user_id) INNER JOIN movies on reviews.film_id = movies.id) WHERE reviews.id = $1;', [reviewId])).rows[0]
 
     return res.json({filmData: reviewForFilm, userData: resultReview})
@@ -38,15 +35,14 @@ class movieController {
       const totalDocs = Number((await db.query('SELECT COUNT(*) FROM movies')).rows[0].count)
       const totalPages = Math.ceil(totalDocs / limit)
       let result = []
-      if (sort) {
-        const sortQuery = sort.split('-') 
-        console.log(sortQuery);
-        result = (await db.query(`SELECT * FROM movies ORDER BY ${sortQuery.length > 1 ? `rating ${sortQuery[1]}, id ${sortQuery[1]}` : `title ${sortQuery[0]}`} LIMIT $1 OFFSET $2`, [limit, (page - 1) * limit])).rows
-        return res.json({docs: result, totalDocs, totalPages})
-      } else {
+      if (!sort) {
         result = (await db.query('SELECT * FROM movies ORDER BY id ASC LIMIT $1 OFFSET $2', [limit, (page - 1) * limit])).rows
-        res.json({docs: result, totalDocs, totalPages})
-      }
+        return res.json({docs: result, totalDocs, totalPages})
+      } 
+      const sortQuery = sort.split('-') 
+      console.log(sortQuery);
+      result = (await db.query(`SELECT * FROM movies ORDER BY ${sortQuery.length > 1 ? `rating ${sortQuery[1]}, id ${sortQuery[1]}` : `title ${sortQuery[0]}`} LIMIT $1 OFFSET $2`, [limit, (page - 1) * limit])).rows
+      return res.json({docs: result, totalDocs, totalPages})
     } catch(e) {
       console.log(e)
     }
@@ -73,7 +69,6 @@ class movieController {
       console.log(reg);
      
       if (!movies.length) {
-        console.log(123);
         return res.json('not found')
       }
 
@@ -99,7 +94,7 @@ class movieController {
       : await db.query('INSERT INTO marks (user_id, film_id, mark) values ($1, $2, $3)', [userId, id, mark])
 
       const allFilmMarks = (await db.query('SELECT mark FROM marks WHERE film_id = $1', [id])).rows
-      console.log(allFilmMarks);
+      // console.log(allFilmMarks);
       let count = 1
       let sum = Number(originRating)
 
@@ -109,7 +104,7 @@ class movieController {
       })
 
       const resRating = (sum / count) % 1 === 0 ? (sum / count) : (sum / count).toFixed(1)
-      console.log(resRating);
+      // console.log(resRating);
       await db.query('UPDATE movies SET rating = $1 WHERE id = $2', [resRating, id])
 
       const userData = (await db.query('SELECT id, img, title, item_type, rating FROM movies WHERE id = $1', [id])).rows[0]
@@ -117,6 +112,7 @@ class movieController {
       return res.json({rating: resRating, userData})
     } catch(e) {
       console.log(e);
+      return res.status(400)
     }
    
   }
@@ -163,7 +159,6 @@ class movieController {
   async deleteReview(req, res) {
     try {
       const { reviewId } = req.body
-      // const userId = req.user.id
       await db.query('DELETE FROM reviews WHERE id = $1', [reviewId])
       return res.json("review deleted")
     } catch (e) {
